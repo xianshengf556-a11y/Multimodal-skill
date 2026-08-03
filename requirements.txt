@@ -1,1 +1,3 @@
 requests>=2.25
+# Optional (only needed for `usage_dashboard.py --screenshot` on Windows):
+pillow>=9.0
