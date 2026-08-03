@@ -6,6 +6,12 @@ import base64
 import sys
 from pathlib import Path
 
+try:  # Windows GBK consoles: avoid UnicodeEncodeError on Chinese/special chars
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import asr_recognize

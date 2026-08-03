@@ -22,6 +22,12 @@ import argparse
 import json
 import sys
 
+try:  # Windows GBK consoles: avoid UnicodeEncodeError on Chinese/special chars
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent.parent))
 
 import usage_tracker
