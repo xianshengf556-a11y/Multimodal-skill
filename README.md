@@ -1,172 +1,165 @@
 # doubao-multimodal-skill
 
-> 让任何 AI 助手/流程拥有「看图 + 听写」能力的多模态技能：**视觉识别（任意 OpenAI 兼容的多模态模型）+ 语音转写（豆包 ASR）+ 可视化用量统计面板**。
+> [English](README.md) | [中文](README.zh-CN.md)
+
+> Give any AI assistant or pipeline the ability to **see images and transcribe speech**: vision recognition (any OpenAI-compatible multimodal model) + speech-to-text (Doubao ASR) + a visual usage dashboard.
 
 ![python](https://img.shields.io/badge/Python-3.9+-blue) ![license](https://img.shields.io/badge/License-MIT-green) ![platform](https://img.shields.io/badge/Platform-Windows%2FmacOS%2FLinux-lightgrey)
 
-## 背景
+## Background
 
-很多场景下，主模型（例如纯文本模型）无法直接"看"图片，或者你希望在自动化流程里对图片做 OCR、图表理解、界面截图质检。本项目把**图片识别**和**语音识别**封装成一个可复用的 Codex 技能：
+In many workflows the host model cannot "see" an image directly (e.g. text-only models), or you want to automate OCR, figure understanding, or UI screenshot QA. This project packages **image recognition** and **speech recognition** into a reusable Codex skill:
 
-- **图片识别不绑定某个厂商**：所有 OpenAI 兼容接口的多模态模型都能用——豆包（火山方舟）、OpenAI GPT-4o、通义千问 Qwen-VL、智谱 GLM-4V，甚至本地 Ollama。切换厂商只改一个环境变量。
-- **语音转写**基于豆包语音 ASR（HTTP 标准版），把 wav/mp3/ogg 转成文字。
-- **用量可视化**：每次识别自动记录图片张数、各模型消耗的 token，并提供一个 Tkinter 面板实时展示统计（识别了多少张图、每个模型用了多少 token）。
+- **Vision is provider-agnostic**: any OpenAI-compatible multimodal model works — Doubao (Volcano Ark), OpenAI GPT-4o, Qwen-VL (DashScope), Zhipu GLM-4V, or a local Ollama endpoint. Switching vendors is a single environment variable.
+- **Speech recognition** uses Doubao ASR (HTTP standard edition) for wav/mp3/ogg files.
+- **Usage dashboard**: every call logs the number of images and per-model token consumption, and a Tkinter panel shows the statistics in real time (how many images were recognized, and how many tokens each model used).
 
-最初它是为了"纯文本模型临时看图"而做的，但它本质是一个通用的多模态能力桥，适用面更广。
+It started as a bridge for text-only models that need to "look" at images, but it is a general-purpose multimodal bridge.
 
-## 特性
+## Features
 
-- ✨ **多 Provider 视觉层**：`doubao / openai / qwen / zhipu / custom` 一键切换，支持本地图片与图片 URL
-- 🔍 **OCR / 图表 / 截图理解**：论文图、流程图、白板、UI 截图、表格图片都能问
-- 🎙 **语音转写 ASR**：本地录音文件 → 文字
-- 🔁 **多模态串联**：语音指令 → 转写 → 看图 → 综合回答（`multimodal_pipeline.py`）
-- 📊 **用量统计面板**：`usage_dashboard.py` 显示累计识别图片数、各模型 token 用量与最近调用记录（数据存本地 `usage.json`，不联网上传）
-- 🧩 **可嵌入业务代码**：`providers/vision.py` 是完整的 OpenAI 兼容调用示例，可直接参考或集成
+- Multi-provider vision: `doubao / openai / qwen / zhipu / custom`, local images or image URLs
+- OCR / chart / screenshot understanding: papers, flowcharts, whiteboards, UIs, tables
+- ASR: local audio files to text
+- Multimodal pipeline: voice instruction -> ASR -> image question -> combined answer
+- Local usage dashboard (`usage_dashboard.py`): images recognized, per-model tokens, recent calls (stored in local `usage.json`, never uploaded)
+- Embeddable: `providers/vision.py` is a complete, minimal OpenAI-compatible client
 
-## 工作原理
+## How it works
 
 ```mermaid
 flowchart LR
-    A[图片 / 截图 / URL] --> B[providers/vision.py]
-    B --> C{OpenAI 兼容接口}
-    C -->|ARK| D[豆包 Doubao]
-    C -->|OpenAI| E[GPT-4o 等]
+    A[Image / screenshot / URL] --> B[providers/vision.py]
+    B --> C{OpenAI-compatible API}
+    C -->|ARK| D[Doubao]
+    C -->|OpenAI| E[GPT-4o etc.]
     C -->|DashScope| F[Qwen-VL]
     C -->|BigModel| G[GLM-4V]
-    D & E & F & G --> H[识别结果 + token 用量]
+    D & E & F & G --> H[Answer + token usage]
     H --> I[usage.json]
-    I --> J[usage_dashboard.py 可视化面板]
-    K[录音 wav] --> L[asr_recognize.py 豆包 ASR]
-    L --> M[文字指令] --> H
+    I --> J[usage_dashboard.py]
+    K[audio wav] --> L[asr_recognize.py]
+    L --> M[text instruction] --> H
 ```
 
-## 快速开始
+## Quick start
 
-### 1. 安装
+### 1. Install
 
-克隆或复制到 Codex 的 skills 目录：
+Clone or copy into the Codex skills directory:
 
 ```bash
 git clone https://github.com/<your-name>/doubao-multimodal-skill.git
 ```
 
-- Windows：放到 `C:\Users\<you>\.codex\skills\doubao-multimodal`
-- macOS / Linux：放到 `~/.codex/skills/doubao-multimodal`
+- Windows: `C:\Users\<you>\.codex\skills\doubao-multimodal`
+- macOS / Linux: `~/.codex/skills/doubao-multimodal`
 
-依赖（仅 `requests`，GUI 用 Python 自带 tkinter）：
+Dependencies (only `requests`; the GUI uses the standard-library tkinter):
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 配置（至少配一个视觉 Provider）
+### 2. Configure (at least one vision provider)
 
-| 变量 | 必填 | 说明 |
+| Variable | Required | Description |
 |---|---|---|
-| `ARK_API_KEY` | 豆包时必填 | 火山方舟 API Key（控制台开通视觉模型） |
-| `ARK_MODEL_ID` | 豆包时建议 | 模型名或推理接入点 ID；**你的账号若默认模型名不可用，请填方舟推理接入点 ID** |
-| `OPENAI_API_KEY` | OpenAI 时必填 | OpenAI Key |
-| `DASHSCOPE_API_KEY` | 通义时必填 | DashScope Key |
-| `ZHIPU_API_KEY` | 智谱时必填 | BigModel Key |
-| `VISION_API_KEY` / `VISION_BASE_URL` / `VISION_MODEL` | custom 时必填 | 自定义 OpenAI 兼容端点 |
-| `DOUBAO_APP_ID` / `DOUBAO_TOKEN` / `DOUBAO_CLUSTER` | 语音时必填 | 豆包语音三件套 |
-| `USAGE_LOG` | 否 | 用量日志路径，默认项目根目录 `usage.json` |
+| `ARK_API_KEY` | Doubao | Volcano Ark API key |
+| `ARK_MODEL_ID` | Doubao (recommended) | Model name or inference endpoint ID; **if the default model name is unavailable on your account, set your Ark endpoint ID here** |
+| `OPENAI_API_KEY` | OpenAI | OpenAI key |
+| `DASHSCOPE_API_KEY` | Qwen | DashScope key |
+| `ZHIPU_API_KEY` | Zhipu | BigModel key |
+| `VISION_API_KEY` / `VISION_BASE_URL` / `VISION_MODEL` | custom | Custom OpenAI-compatible endpoint |
+| `DOUBAO_APP_ID` / `DOUBAO_TOKEN` / `DOUBAO_CLUSTER` | ASR | Doubao speech credentials |
+| `USAGE_LOG` | no | Usage log path (default: `usage.json` in the repo root) |
 
-选择 Provider 两种方式：环境变量 `VISION_PROVIDER`，或命令行 `--provider`。
+Select a provider via the `VISION_PROVIDER` env var or the `--provider` CLI flag.
 
-### 3. 第一个例子
+### 3. First example
 
 ```bash
-# 豆包看图（默认自动检测，也可显式指定）
-python scripts/vision_recognize.py 截图.png "这张图里有什么？"
-
-# 指定 OpenAI 兼容厂商
-python scripts/vision_recognize.py https://example.com/a.png "描述图片内容" --url --provider openai --model gpt-4o-mini
-
-# 查看用量面板
+python scripts/vision_recognize.py screenshot.png "What is in this image?"
+python scripts/vision_recognize.py https://example.com/a.png "Describe the image" --url --provider openai --model gpt-4o-mini
 python scripts/usage_dashboard.py
 ```
 
-## 用法详解
+## Usage
 
-### 图片识别 / 视觉理解
+### Vision recognition
 
 ```bash
-python scripts/vision_recognize.py <本地图片或URL> [问题] [--url] [--provider X] [--model Y] [--json]
+python scripts/vision_recognize.py <image|url> [question] [--url] [--provider X] [--model Y] [--json]
 ```
 
-示例：
+Examples:
 
 ```bash
-python scripts/vision_recognize.py paper_figure.png "这个图的横轴和纵轴是什么？趋势如何？"
-python scripts/vision_recognize.py receipt.jpg "把发票上的金额和税号读出来" --provider qwen
-python scripts/vision_recognize.py ui_screenshot.png "这个界面有哪些按钮？布局是否合理？" --json
+python scripts/vision_recognize.py paper_figure.png "What are the axes and the trend?"
+python scripts/vision_recognize.py receipt.jpg "Read the amount and tax ID" --provider qwen
+python scripts/vision_recognize.py ui_screenshot.png "Which buttons exist?" --json
 ```
 
-`--json` 会额外输出 Provider、模型和 token 用量，方便脚本对接。
+`--json` also prints the provider, model, and token usage.
 
-### 语音转写
+### Speech-to-text
 
 ```bash
-python scripts/asr_recognize.py 录音.wav
+python scripts/asr_recognize.py audio.wav
 python scripts/asr_recognize.py --url https://example.com/audio.wav
 ```
 
-### 多模态串联（语音 → 看图 → 回答）
+### Multimodal pipeline
 
 ```bash
-python scripts/multimodal_pipeline.py scene.jpg --audio 问题录音.wav
-python scripts/multimodal_pipeline.py scene.jpg --question "这张图里有没有行人？"
+python scripts/multimodal_pipeline.py scene.jpg --audio question.wav
+python scripts/multimodal_pipeline.py scene.jpg --question "Are there any pedestrians?"
 ```
 
-### 用量统计面板
+### Usage dashboard
 
 ```bash
-python scripts/usage_dashboard.py            # 打开实时面板
-python scripts/usage_dashboard.py --screenshot dashboard.png   # Windows 下导出面板截图
+python scripts/usage_dashboard.py                        # live dashboard
+python scripts/usage_dashboard.py --screenshot dashboard.png   # export a PNG (Windows)
 ```
 
-面板显示：**累计调用次数 / 识别图片数 / 总 Token**，按模型分组的统计表，以及最近 200 条调用记录（时间、Provider、模型、图片数、输入/输出/总 token、问题摘要）。数据只存在本地 `usage.json`。
+The dashboard shows total calls / images / tokens, a per-model table, and the most recent 200 calls. Data lives in local `usage.json`.
 
-![用量统计面板](docs/dashboard.png)
+![usage dashboard](docs/dashboard.png)
 
-## 目录结构
+## Project layout
 
 ```
 doubao-multimodal-skill/
-├── SKILL.md                    # 技能说明（Codex 识别入口）
-├── README.md / README.en.md    # 中英文说明
+├── SKILL.md
+├── README.md / README.zh-CN.md
 ├── LICENSE / requirements.txt / .gitignore
 ├── providers/
 │   ├── __init__.py
-│   └── vision.py               # 多 Provider 视觉调用（OpenAI 兼容）
+│   └── vision.py
 ├── scripts/
-│   ├── vision_recognize.py     # 视觉识别 CLI
-│   ├── asr_recognize.py        # 豆包语音转写 CLI
-│   ├── multimodal_pipeline.py  # 语音+视觉串联
-│   ├── voice_input.py          # 按键录音采集辅助
-│   ├── usage_tracker.py        # 用量记录（usage.json）
-│   └── usage_dashboard.py      # Tkinter 用量面板
+│   ├── vision_recognize.py
+│   ├── asr_recognize.py
+│   ├── multimodal_pipeline.py
+│   ├── voice_input.py
+│   ├── usage_tracker.py
+│   └── usage_dashboard.py
 ├── references/
-│   └── api_reference.md        # API 参考
+│   └── api_reference.md
 └── agents/
     └── openai.yaml
 ```
 
-## 常见问题
+## FAQ
 
-**Q1：豆包报 `InvalidEndpointOrModel.NotFound`？**
-你的账号可能没有默认模型名的访问权限。在火山方舟控制台创建推理接入点，然后把接入点 ID 填入 `ARK_MODEL_ID`（例如 `ep-xxxxx`），或使用 `--model ep-xxxxx`。
+**Q1: Doubao returns `InvalidEndpointOrModel.NotFound`?** Your account may not have access to the default model name. Create an inference endpoint in the Ark console and set `ARK_MODEL_ID` (e.g. `ep-xxxxx`) or pass `--model ep-xxxxx`.
 
-**Q2：用量统计没有 token 数？**
-部分厂商/模型不返回 `usage` 字段，此时记录 token 为 0；换用支持返回 usage 的模型即可。
+**Q2: No token numbers in the log?** Some vendors/models do not return a `usage` field; tokens are then logged as 0.
 
-**Q3：可以接入本地模型吗？**
-可以。任何暴露 OpenAI 兼容 `chat/completions` 接口的服务都能用，例如本地 Ollama：`--provider custom --model llama3.2-vision --api-key 任意`，并设置 `VISION_BASE_URL=http://localhost:11434/v1`。
+**Q3: Can I use a local model?** Yes, any service exposing an OpenAI-compatible `chat/completions` endpoint works, e.g. Ollama: `--provider custom --model llama3.2-vision`, with `VISION_BASE_URL=http://localhost:11434/v1`.
 
-**Q4：Windows 控制台中文乱码？**
-终端执行 `chcp 65001`，或把输出重定向到文件后查看。
+**Q4: Chinese text looks garbled on Windows console?** Run `chcp 65001`, or redirect output to a file.
 
-## 许可证
+## License
 
 MIT
