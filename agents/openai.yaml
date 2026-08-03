@@ -1,0 +1,4 @@
+interface:
+  display_name: "豆包多模态模型"
+  short_description: "用豆包大模型搭建图片识别与语音识别能力，提供可运行示例与API参考"
+  default_prompt: "使用 $doubao-multimodal 搭建豆包多模态的图片识别与语音识别能力。"
