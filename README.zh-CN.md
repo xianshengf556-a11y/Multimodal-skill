@@ -110,6 +110,14 @@ python scripts/vision_recognize.py https://example.com/a.png "描述图片内容
 python scripts/usage_dashboard.py
 ```
 
+### 首次使用体验（无需手动配置）
+
+如果还没配置 API Key，第一次识别会**自动弹出配置窗口**：选厂商 → 填 API Key（和模型/方舟接入点 ID）→ 点**测试连接**验证 → 点**保存并继续**，识别会自动重试，之后**用量面板自动打开**。也可以手动打开配置窗口：
+
+```bash
+python scripts/vision_recognize.py --setup
+```
+
 ## 用法详解
 
 ### 图片识别 / 视觉理解

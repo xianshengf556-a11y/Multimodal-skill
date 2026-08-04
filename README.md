@@ -105,6 +105,14 @@ python scripts/vision_recognize.py https://example.com/a.png "Describe the image
 python scripts/usage_dashboard.py
 ```
 
+### First-run experience (no manual config needed)
+
+If no API key is configured yet, the first recognition **automatically pops up a setup window**: choose a provider, enter the API key (and model / Ark endpoint ID), click **Test connection** to verify, then **Save & continue** — recognition retries automatically and the **usage dashboard opens by itself** afterwards. You can also open the setup window manually:
+
+```bash
+python scripts/vision_recognize.py --setup
+```
+
 ## Usage
 
 ### Vision recognition

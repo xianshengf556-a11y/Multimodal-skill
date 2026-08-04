@@ -118,7 +118,10 @@ def recognize(image, question, provider=None, model=None, timeout=120):
             f"Missing API key for provider '{cfg['provider']}'."
             " Set the matching API key environment variable (see README)."
         )
-    image_url = image if image.startswith(("http://", "https://")) else file_to_data_url(image)
+    if image.startswith(("http://", "https://", "data:")):
+        image_url = image
+    else:
+        image_url = file_to_data_url(image)
     payload = {
         "model": cfg["model"],
         "messages": [

@@ -32,7 +32,7 @@ python scripts/vision_recognize.py 本地图片.jpg "图片里有什么？"
 python scripts/vision_recognize.py https://example.com/a.png "描述图片" --url --provider openai
 ```
 
-每次调用自动把 Provider、模型、图片数、token 用量写入 `usage.json`。
+若未配置 API Key，首次调用会自动弹出配置窗口（选厂商、填 Key、可"测试连接"），保存后自动重试识别；识别成功后自动打开用量面板。每次调用自动把 Provider、模型、图片数、token 用量写入 `usage.json`。
 
 ### 3. 语音识别
 
