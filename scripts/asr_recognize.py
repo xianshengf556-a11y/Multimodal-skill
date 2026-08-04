@@ -51,7 +51,7 @@ def build_app() -> dict:
 def submit(app: dict, audio: dict, format_name: str) -> str:
     body = {
         "app": app,
-        "user": {"uid": "doubao-multimodal-skill"},
+        "user": {"uid": "multimodal-skill"},
         "audio": {**audio, "format": format_name},
         "request": {"model_name": "bigmodel"},
     }

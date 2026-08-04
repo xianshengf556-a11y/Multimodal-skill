@@ -1,5 +1,5 @@
 ---
-name: doubao-multimodal
+name: multimodal-skill
 description: >-
   基于多模态大模型（豆包/OpenAI 兼容任意视觉模型 + 豆包语音 ASR）的通用多模态技能：
   图片识别/视觉理解（图像描述、OCR、图表与文档分析）、语音转写（ASR）、
@@ -89,7 +89,7 @@ answer, usage, cfg = recognize("img.png", "图片里有什么？", provider="dou
 ## 目录结构
 
 ```
-doubao-multimodal-skill/
+multimodal-skill/
 ├── SKILL.md
 ├── providers/vision.py        # 多 Provider 视觉调用
 ├── scripts/
