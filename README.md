@@ -2,198 +2,57 @@
 
 > [English](README.md) | [中文](README.zh-CN.md)
 
-> Give any AI assistant or pipeline the ability to **see images and transcribe speech**: vision recognition (any OpenAI-compatible multimodal model) + speech-to-text (Doubao ASR) + a visual usage dashboard.
+Give your AI assistant the ability to **see images** (any OpenAI-compatible vision model) and **transcribe speech** (Doubao ASR), with a built-in **usage dashboard** that shows how many images were recognized and how many tokens each model used.
 
-![python](https://img.shields.io/badge/Python-3.9+-blue) ![license](https://img.shields.io/badge/License-MIT-green) ![platform](https://img.shields.io/badge/Platform-Windows%2FmacOS%2FLinux-lightgrey)
+![python](https://img.shields.io/badge/Python-3.9+-blue) ![license](https://img.shields.io/badge/License-MIT-green)
 
-## Background
+## What you get
 
-In many workflows the host model cannot "see" an image directly (e.g. text-only models), or you want to automate OCR, figure understanding, or UI screenshot QA. This project packages **image recognition** and **speech recognition** into a reusable Codex skill:
+- **See images in chat** — drag a screenshot / photo / figure into the chat; the assistant reads it (description, OCR, charts, UIs)
+- **Any vision provider** — Doubao, OpenAI, Qwen-VL, GLM-4V, or a local endpoint; switch with one setting
+- **Speech-to-text** — turn wav/mp3/ogg recordings into text
+- **Usage dashboard** — a window that shows recognized-image count and per-model token usage
 
-- **Vision is provider-agnostic**: any OpenAI-compatible multimodal model works — Doubao (Volcano Ark), OpenAI GPT-4o, Qwen-VL (DashScope), Zhipu GLM-4V, or a local Ollama endpoint. Switching vendors is a single environment variable.
-- **Speech recognition** uses Doubao ASR (HTTP standard edition) for wav/mp3/ogg files.
-- **Usage dashboard**: every call logs the number of images and per-model token consumption, and a Tkinter panel shows the statistics in real time (how many images were recognized, and how many tokens each model used).
+## Quick start for chat users (2 steps)
 
-It started as a bridge for text-only models that need to "look" at images, but it is a general-purpose multimodal bridge.
-
-## Features
-
-- Multi-provider vision: `doubao / openai / qwen / zhipu / custom`, local images or image URLs
-- OCR / chart / screenshot understanding: papers, flowcharts, whiteboards, UIs, tables
-- ASR: local audio files to text
-- Multimodal pipeline: voice instruction -> ASR -> image question -> combined answer
-- Local usage dashboard (`usage_dashboard.py`): images recognized, per-model tokens, recent calls (stored in local `usage.json`, never uploaded)
-- Embeddable: `providers/vision.py` is a complete, minimal OpenAI-compatible client
-
-## How it works
-
-```mermaid
-flowchart LR
-    A[Image / screenshot / URL] --> B[providers/vision.py]
-    B --> C{OpenAI-compatible API}
-    C -->|ARK| D[Doubao]
-    C -->|OpenAI| E[GPT-4o etc.]
-    C -->|DashScope| F[Qwen-VL]
-    C -->|BigModel| G[GLM-4V]
-    D & E & F & G --> H[Answer + token usage]
-    H --> I[usage.json]
-    I --> J[usage_dashboard.py]
-    K[audio wav] --> L[asr_recognize.py]
-    L --> M[text instruction] --> H
-```
-
-## Two ways to use it
-
-**1. In a chat (recommended, no terminal needed).** Install the skill, then simply drag an image / screenshot into the chat and ask a question. The AI assistant calls `scripts/vision_recognize.py <image> "<question>" --json` automatically, handles the first-run API setup window, and reports the answer together with the token usage. The usage dashboard opens by itself after a successful recognition.
-
-**2. From the command line (for developers).** See the quick start below.
-
-## Quick start
-
-### 1. Install
-
-Clone or copy into the Codex skills directory:
+**Step 1 — install.** Clone or download this repo, then put the folder into your skills directory:
 
 ```bash
-git clone https://github.com/<your-name>/doubao-multimodal-skill.git
+git clone https://github.com/xianshengf556-a11y/Multimodal-skill.git
 ```
 
-- Windows: `C:\Users\<you>\.codex\skills\doubao-multimodal`
-- macOS / Linux: `~/.codex/skills/doubao-multimodal`
+- Windows: move the folder to `C:\Users\<you>\.codex\skills\`
+- macOS / Linux: move it to `~/.codex/skills/`
 
-Dependencies (only `requests`; the GUI uses the standard-library tkinter):
+**Step 2 — use it.** Drag an image into the chat and ask "what is this?". The first time, a setup window pops up: pick a provider, paste your API key, click **Test**, then **Save**. That's it — recognition and the usage dashboard start working.
+
+> No terminal needed for everyday use. The command line is only for developers (below).
+
+## Quick start for developers
 
 ```bash
 pip install -r requirements.txt
-```
+cp .env.example .env     # fill in your key, e.g. ARK_API_KEY=...
 
-### 2. Configure API keys (at least one vision provider)
-
-**Option A (recommended): a `.env` file in the project root.** Copy `.env.example` to `.env`, fill in your keys, and you are done — every script loads it automatically:
-
-```bash
-cp .env.example .env
-# edit .env and fill, e.g.:
-#   ARK_API_KEY=sk-xxxxxxxx
-#   ARK_MODEL_ID=ep-xxxxx
-```
-
-**Option B: system environment variables.** The scripts read these directly; real environment variables always override `.env`.
-
-```bash
-# Windows (PowerShell, current session)
-$env:ARK_API_KEY = "sk-xxxxxxxx"
-$env:ARK_MODEL_ID = "ep-xxxxx"
-
-# macOS / Linux
-export ARK_API_KEY=sk-xxxxxxxx
-export ARK_MODEL_ID=ep-xxxxx
-```
-
-Select the provider with `VISION_PROVIDER` (`doubao|openai|qwen|zhipu|custom`) or the `--provider` flag; without it, the provider is auto-detected from whichever key is set.
-
-| Variable | Required | Description |
-|---|---|---|
-| `ARK_API_KEY` | Doubao | Volcano Ark API key |
-| `ARK_MODEL_ID` | Doubao (recommended) | Model name or inference endpoint ID; **if the default model name is unavailable on your account, set your Ark endpoint ID here** |
-| `OPENAI_API_KEY` | OpenAI | OpenAI key |
-| `DASHSCOPE_API_KEY` | Qwen | DashScope key |
-| `ZHIPU_API_KEY` | Zhipu | BigModel key |
-| `VISION_API_KEY` / `VISION_BASE_URL` / `VISION_MODEL` | custom | Custom OpenAI-compatible endpoint |
-| `DOUBAO_APP_ID` / `DOUBAO_TOKEN` / `DOUBAO_CLUSTER` | ASR | Doubao speech credentials |
-| `USAGE_LOG` | no | Usage log path (default: `usage.json` in the repo root) |
-
-### 3. First example
-
-```bash
-python scripts/vision_recognize.py screenshot.png "What is in this image?"
-python scripts/vision_recognize.py https://example.com/a.png "Describe the image" --url --provider openai --model gpt-4o-mini
+python scripts/vision_recognize.py img.png "what is this?" --json
 python scripts/usage_dashboard.py
 ```
 
-### First-run experience (no manual config needed)
+## API keys (the short version)
 
-If no API key is configured yet, the first recognition **automatically pops up a setup window**: choose a provider, enter the API key (and model / Ark endpoint ID), click **Test connection** to verify, then **Save & continue** — recognition retries automatically and the **usage dashboard opens by itself** afterwards. You can also open the setup window manually:
+| Provider | Variables | Where to get it |
+|---|---|---|
+| Doubao | `ARK_API_KEY` (+ `ARK_MODEL_ID` = endpoint ID) | Volcano Ark console |
+| OpenAI | `OPENAI_API_KEY` | platform.openai.com |
+| Qwen / Zhipu / custom | see `.env.example` | their consoles |
 
-```bash
-python scripts/vision_recognize.py --setup
-```
-
-## Usage
-
-### Vision recognition
-
-```bash
-python scripts/vision_recognize.py <image|url> [question] [--url] [--provider X] [--model Y] [--json]
-```
-
-Examples:
-
-```bash
-python scripts/vision_recognize.py paper_figure.png "What are the axes and the trend?"
-python scripts/vision_recognize.py receipt.jpg "Read the amount and tax ID" --provider qwen
-python scripts/vision_recognize.py ui_screenshot.png "Which buttons exist?" --json
-```
-
-`--json` also prints the provider, model, and token usage.
-
-### Speech-to-text
-
-```bash
-python scripts/asr_recognize.py audio.wav
-python scripts/asr_recognize.py --url https://example.com/audio.wav
-```
-
-### Multimodal pipeline
-
-```bash
-python scripts/multimodal_pipeline.py scene.jpg --audio question.wav
-python scripts/multimodal_pipeline.py scene.jpg --question "Are there any pedestrians?"
-```
-
-### Usage dashboard
-
-```bash
-python scripts/usage_dashboard.py                        # live dashboard
-python scripts/usage_dashboard.py --screenshot dashboard.png   # export a PNG (Windows)
-```
-
-The dashboard shows total calls / images / tokens, a per-model table, and the most recent 200 calls. Data lives in local `usage.json`.
-
-![usage dashboard](docs/dashboard.png)
-
-## Project layout
-
-```
-doubao-multimodal-skill/
-├── SKILL.md
-├── README.md / README.zh-CN.md
-├── LICENSE / requirements.txt / .gitignore
-├── providers/
-│   ├── __init__.py
-│   └── vision.py
-├── scripts/
-│   ├── vision_recognize.py
-│   ├── asr_recognize.py
-│   ├── multimodal_pipeline.py
-│   ├── voice_input.py
-│   ├── usage_tracker.py
-│   └── usage_dashboard.py
-├── references/
-│   └── api_reference.md
-└── agents/
-    └── openai.yaml
-```
+Pick a provider with `VISION_PROVIDER` (or `--provider`); if unset it is auto-detected from whichever key exists. Full variable list: [.env.example](.env.example).
 
 ## FAQ
 
-**Q1: Doubao returns `InvalidEndpointOrModel.NotFound`?** Your account may not have access to the default model name. Create an inference endpoint in the Ark console and set `ARK_MODEL_ID` (e.g. `ep-xxxxx`) or pass `--model ep-xxxxx`.
-
-**Q2: No token numbers in the log?** Some vendors/models do not return a `usage` field; tokens are then logged as 0.
-
-**Q3: Can I use a local model?** Yes, any service exposing an OpenAI-compatible `chat/completions` endpoint works, e.g. Ollama: `--provider custom --model llama3.2-vision`, with `VISION_BASE_URL=http://localhost:11434/v1`.
-
-**Q4: Chinese text looks garbled on Windows console?** Run `chcp 65001`, or redirect output to a file.
+- **Doubao says "model not found"?** Create an inference endpoint in the Ark console and put its ID (`ep-xxxx`) into `ARK_MODEL_ID`.
+- **Where is my usage data?** Local `usage.json`; view it in the dashboard.
+- **Does it upload my data?** Only your image and question are sent to the provider you chose. Usage stats stay on your machine.
 
 ## License
 
