@@ -16,6 +16,20 @@ description: >-
 3. **多模态串联**：语音指令 → ASR 转文字 → 图片理解 → 综合回答（`multimodal_pipeline.py`）。
 4. **用量统计面板**：`usage_dashboard.py`（Tkinter）实时显示累计识别图片数、每个模型消耗的 token 与最近调用记录；数据保存在本地 `usage.json`。
 
+## 在聊天中怎么用（推荐流程，用户无需碰终端）
+
+用户把图片/截图拖进聊天框并提问即可，**由 AI 助手自动调用本技能**：
+
+1. 从用户消息或附件中取得图片的本地路径（如 `C:\Users\...\Temp\xxx.png`）与用户的提问；
+2. 执行：
+   ```bash
+   python scripts/vision_recognize.py "<图片路径>" "<用户问题>" --json
+   ```
+3. 若输出包含 "未配置 API Key"，说明首次使用：在桌面环境会自动弹出配置窗口；若运行环境无桌面，则提示用户运行 `python scripts/vision_recognize.py --setup` 完成配置后重试；
+4. 识别成功后，向用户汇报：识别结果 + 本次 token 用量（provider/model/total_tokens），用量面板会自动打开，也可提示用户随时用 `python scripts/usage_dashboard.py` 查看累计用量。
+
+> 开发者/命令行用户也可以直接运行 `scripts/vision_recognize.py`，用法见 README。
+
 ## 快速开始
 
 ### 1. 配置环境变量（至少一个视觉 Provider）

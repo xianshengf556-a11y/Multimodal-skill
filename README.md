@@ -42,6 +42,12 @@ flowchart LR
     L --> M[text instruction] --> H
 ```
 
+## Two ways to use it
+
+**1. In a chat (recommended, no terminal needed).** Install the skill, then simply drag an image / screenshot into the chat and ask a question. The AI assistant calls `scripts/vision_recognize.py <image> "<question>" --json` automatically, handles the first-run API setup window, and reports the answer together with the token usage. The usage dashboard opens by itself after a successful recognition.
+
+**2. From the command line (for developers).** See the quick start below.
+
 ## Quick start
 
 ### 1. Install
