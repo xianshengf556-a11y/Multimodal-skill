@@ -14,6 +14,7 @@ except Exception:
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import env_loader  # noqa: F401  (loads .env if present)
 import asr_recognize
 import usage_tracker
 from providers.vision import recognize

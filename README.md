@@ -61,7 +61,30 @@ Dependencies (only `requests`; the GUI uses the standard-library tkinter):
 pip install -r requirements.txt
 ```
 
-### 2. Configure (at least one vision provider)
+### 2. Configure API keys (at least one vision provider)
+
+**Option A (recommended): a `.env` file in the project root.** Copy `.env.example` to `.env`, fill in your keys, and you are done — every script loads it automatically:
+
+```bash
+cp .env.example .env
+# edit .env and fill, e.g.:
+#   ARK_API_KEY=sk-xxxxxxxx
+#   ARK_MODEL_ID=ep-xxxxx
+```
+
+**Option B: system environment variables.** The scripts read these directly; real environment variables always override `.env`.
+
+```bash
+# Windows (PowerShell, current session)
+$env:ARK_API_KEY = "sk-xxxxxxxx"
+$env:ARK_MODEL_ID = "ep-xxxxx"
+
+# macOS / Linux
+export ARK_API_KEY=sk-xxxxxxxx
+export ARK_MODEL_ID=ep-xxxxx
+```
+
+Select the provider with `VISION_PROVIDER` (`doubao|openai|qwen|zhipu|custom`) or the `--provider` flag; without it, the provider is auto-detected from whichever key is set.
 
 | Variable | Required | Description |
 |---|---|---|
@@ -73,8 +96,6 @@ pip install -r requirements.txt
 | `VISION_API_KEY` / `VISION_BASE_URL` / `VISION_MODEL` | custom | Custom OpenAI-compatible endpoint |
 | `DOUBAO_APP_ID` / `DOUBAO_TOKEN` / `DOUBAO_CLUSTER` | ASR | Doubao speech credentials |
 | `USAGE_LOG` | no | Usage log path (default: `usage.json` in the repo root) |
-
-Select a provider via the `VISION_PROVIDER` env var or the `--provider` CLI flag.
 
 ### 3. First example
 

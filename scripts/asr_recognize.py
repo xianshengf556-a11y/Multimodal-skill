@@ -25,6 +25,9 @@ import sys
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import env_loader  # noqa: F401  (loads .env if present)
+
 import requests
 
 

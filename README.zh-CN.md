@@ -61,7 +61,30 @@ git clone https://github.com/<your-name>/doubao-multimodal-skill.git
 pip install -r requirements.txt
 ```
 
-### 2. 配置（至少配一个视觉 Provider）
+### 2. 配置 API Key（至少配一个视觉 Provider）
+
+**方式一（推荐）：在项目根目录放一个 `.env` 文件。** 把 `.env.example` 复制成 `.env`，填上你的 Key 即可——所有脚本启动时都会自动读取：
+
+```bash
+cp .env.example .env
+# 打开 .env 填写，例如：
+#   ARK_API_KEY=sk-xxxxxxxx
+#   ARK_MODEL_ID=ep-xxxxx
+```
+
+**方式二：系统环境变量。** 脚本直接读取环境变量；真实环境变量的优先级高于 `.env`。
+
+```bash
+# Windows（PowerShell，当前会话）
+$env:ARK_API_KEY = "sk-xxxxxxxx"
+$env:ARK_MODEL_ID = "ep-xxxxx"
+
+# macOS / Linux
+export ARK_API_KEY=sk-xxxxxxxx
+export ARK_MODEL_ID=ep-xxxxx
+```
+
+用 `VISION_PROVIDER`（`doubao|openai|qwen|zhipu|custom`）或命令行 `--provider` 指定厂商；不指定时按已配置的 Key 自动检测。
 
 | 变量 | 必填 | 说明 |
 |---|---|---|
@@ -73,8 +96,6 @@ pip install -r requirements.txt
 | `VISION_API_KEY` / `VISION_BASE_URL` / `VISION_MODEL` | custom 时必填 | 自定义 OpenAI 兼容端点 |
 | `DOUBAO_APP_ID` / `DOUBAO_TOKEN` / `DOUBAO_CLUSTER` | 语音时必填 | 豆包语音三件套 |
 | `USAGE_LOG` | 否 | 用量日志路径，默认项目根目录 `usage.json` |
-
-选择 Provider 两种方式：环境变量 `VISION_PROVIDER`，或命令行 `--provider`。
 
 ### 3. 第一个例子
 

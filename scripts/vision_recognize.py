@@ -30,6 +30,7 @@ except Exception:
 
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent.parent))
 
+import env_loader  # noqa: F401  (loads .env if present)
 import usage_tracker
 from providers.vision import recognize
 

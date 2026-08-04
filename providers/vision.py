@@ -69,6 +69,9 @@ def resolve_provider(name=None):
     """Pick a provider: explicit name wins, otherwise auto-detect by API key."""
     if name and name in PROVIDERS:
         return name
+    env_provider = os.environ.get("VISION_PROVIDER", "").strip().lower()
+    if env_provider in PROVIDERS:
+        return env_provider
     for p in ("doubao", "openai", "qwen", "zhipu"):
         if os.environ.get(PROVIDERS[p]["api_key_env"]):
             return p
