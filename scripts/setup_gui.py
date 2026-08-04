@@ -86,19 +86,35 @@ def run(initial_provider=None):
     key_entry = tk.Entry(form, textvariable=key_var, show="*", width=40)
     key_entry.grid(row=1, column=1, sticky="we", pady=6)
 
-    tk.Label(form, text="模型 / 接入点 ID", bg="#F4F6F9", font=("Microsoft YaHei UI", 10)).grid(row=2, column=0, sticky="w", pady=6)
+    # Advanced (optional) model / endpoint field, hidden by default
+    advanced_var = tk.BooleanVar(value=False)
+    advanced_frame = tk.Frame(form, bg="#F4F6F9")
     model_var = tk.StringVar(value=existing.get(meta()[1], ""))
-    model_entry = tk.Entry(form, textvariable=model_var, width=40)
-    model_entry.grid(row=2, column=1, sticky="we", pady=6)
-    hint = tk.Label(form, text="", bg="#F4F6F9", fg="#6B7280",
-                    font=("Microsoft YaHei UI", 8), wraplength=420, justify="left")
-    hint.grid(row=3, column=1, sticky="w")
-    hint.configure(text=meta()[2])
+    model_entry = tk.Entry(advanced_frame, textvariable=model_var, width=40)
+    hint = tk.Label(advanced_frame, text="", bg="#F4F6F9", fg="#6B7280",
+                    font=("Microsoft YaHei UI", 8), wraplength=400, justify="left")
+    tk.Label(advanced_frame, text="模型 / 接入点 ID（可选）", bg="#F4F6F9",
+             font=("Microsoft YaHei UI", 9)).pack(anchor="w")
+    model_entry.pack(fill="x", pady=(2, 0))
+    hint.pack(anchor="w", pady=(2, 0))
+
+    def toggle_advanced():
+        if advanced_var.get():
+            advanced_frame.grid(row=2, column=0, columnspan=2, sticky="we", pady=4)
+            hint.configure(text=meta()[2])
+        else:
+            advanced_frame.grid_remove()
+
+    ttk.Checkbutton(form, text="高级选项（模型/接入点 ID，一般不用填）",
+                    variable=advanced_var, command=toggle_advanced).grid(
+        row=2, column=0, columnspan=2, sticky="w", pady=2)
+    toggle_advanced()
 
     def on_provider_change(_event=None):
         key_var.set(existing.get(meta()[0], ""))
         model_var.set(existing.get(meta()[1], ""))
-        hint.configure(text=meta()[2])
+        if advanced_var.get():
+            hint.configure(text=meta()[2])
 
     combo.bind("<<ComboboxSelected>>", on_provider_change)
 

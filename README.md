@@ -32,21 +32,18 @@ git clone https://github.com/xianshengf556-a11y/Multimodal-skill.git
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env     # fill in your key, e.g. ARK_API_KEY=...
 
 python scripts/vision_recognize.py img.png "what is this?" --json
 python scripts/usage_dashboard.py
 ```
 
-## API keys (the short version)
+## How the API key works
 
-| Provider | Variables | Where to get it |
-|---|---|---|
-| Doubao | `ARK_API_KEY` (+ `ARK_MODEL_ID` = endpoint ID) | Volcano Ark console |
-| OpenAI | `OPENAI_API_KEY` | platform.openai.com |
-| Qwen / Zhipu / custom | see `.env.example` | their consoles |
+**No manual configuration.** The first time you use it, a setup window pops up automatically: pick a provider, paste your API key, click **Test**, then **Save**. Nothing to edit by hand.
 
-Pick a provider with `VISION_PROVIDER` (or `--provider`); if unset it is auto-detected from whichever key exists. Full variable list: [.env.example](.env.example).
+Where to get the key: Doubao → Volcano Ark console; OpenAI → platform.openai.com; Qwen / Zhipu / custom → their consoles.
+
+> Developers can also configure the key in advance via a `.env` file or environment variables (see `.env.example`), or select a provider with `--provider`.
 
 ## FAQ
 

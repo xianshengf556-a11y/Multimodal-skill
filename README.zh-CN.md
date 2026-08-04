@@ -32,21 +32,18 @@ git clone https://github.com/xianshengf556-a11y/Multimodal-skill.git
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env     # 填 Key，例如 ARK_API_KEY=...
 
 python scripts/vision_recognize.py 图片.png "这是什么？" --json
 python scripts/usage_dashboard.py
 ```
 
-## API Key（简短版）
+## API Key 怎么填
 
-| 厂商 | 变量 | 在哪拿 |
-|---|---|---|
-| 豆包 | `ARK_API_KEY`（建议再加 `ARK_MODEL_ID` = 推理接入点 ID） | 火山方舟控制台 |
-| OpenAI | `OPENAI_API_KEY` | platform.openai.com |
-| 通义 / 智谱 / 自定义 | 见 `.env.example` | 各自控制台 |
+**不用手动配置。** 第一次使用时会自动弹出配置窗口：选厂商 → 粘贴 API Key → 点"测试" → "保存"，完事。
 
-用 `VISION_PROVIDER`（或 `--provider`）指定厂商；不填则按已配置的 Key 自动检测。完整变量列表见 [.env.example](.env.example)。
+Key 在哪拿：豆包 → 火山方舟控制台；OpenAI → platform.openai.com；通义 / 智谱 / 自定义 → 各自控制台。
+
+> 开发者也可以提前用 `.env` 文件或环境变量配置（见 `.env.example`），或用 `--provider` 指定厂商。
 
 ## 常见问题
 
